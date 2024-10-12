@@ -1,0 +1,7 @@
+menu "User Configuration String"
+    config USER_NAME
+            string "user name"
+            default "Mark"
+            help
+                Type a user name that you want to use in the code
+endmenu
