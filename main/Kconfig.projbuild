@@ -64,4 +64,16 @@ menu "User Configuration"
             help
                 Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
     endmenu
+    menu "HTTP Server settings"
+        config HTTP_SERVER_URL
+            string "HTTP SERVER URL"
+            default "http://[IP]:[PORT]/api/ets2/telemetry"
+            help
+                URL of ETS2 HTTP server.
+        config BUFFER_SIZE
+            int "Buffer size"
+            default 2048
+            help
+                Buffer size of json data from http server.
+    endmenu
 endmenu

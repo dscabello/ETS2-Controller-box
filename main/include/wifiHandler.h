@@ -14,6 +14,10 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "ets2ctrl.h"
+
+extern bool WifiConnected;
+
 extern void ConnectToWifi();
 
 #endif // WIFIHANDLER_H

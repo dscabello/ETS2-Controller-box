@@ -9,6 +9,8 @@
 #include "freertos/semphr.h"
 #include "esp_err.h"
 
+#include "ets2ctrl.h"
+#include "httpHandler.h"
 
 extern void MainThread(void *arg);
 
