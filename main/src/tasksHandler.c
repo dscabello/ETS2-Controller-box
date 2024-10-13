@@ -6,6 +6,6 @@ void MainThread(void *arg) {
     while (1) {
         printf("\n\nRunning the task");
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(10000));
     }
 }

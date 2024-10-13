@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Others
-sdkconfig
 build/
 .vscode/
 sdkconfig
+sdkconfig.old
