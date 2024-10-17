@@ -1,32 +1,117 @@
-# _Sample project_
+# ETS2 Controller Box
+
+
+## Overview
+The ETS2 Controller Box is a feedback software designed for Euro Truck Simulator 2 (ETS2). It enhances your gaming experience by providing real-time telemetry data and customizable feedback options. Whether you're a casual player or a simulation enthusiast, this tool helps you monitor your in-game performance and improve your driving skills.
+
+## Features
+- Real-time Telemetry: Access live data from your ETS2 game, including truck performance metrics.
+- Support for Multiple Inputs: Use various input methods for controlling and receiving feedback, such as buttons, sliders, and dials.
+
+## Getting Started
+### Prerequisites
+
+Before you begin, ensure you have met the following requirements:
+
+- Hardware: A compatible device running ETS2.
+Software:
+- ESP-IDF (for ESP32 development)
+- Dependencies as mentioned in the requirements.txt (ESP-IDF).
+
+## Installation
+
+### Clone the repository:
+
+bash
+Copy code
+git clone [ETS2-Controller-box](https://github.com/dscabello/ETS2-Controller-box).git
+cd ETS2-Controller-box
+
+Set up the [ESP-IDF](https://github.com/espressif/esp-idf) environment: Follow the official ESP-IDF Getting Started guide to set up the development environment.
+
+### Build the project:
+```
+bash
+Copy code
+idf.py build
+```
+
+### Flash the firmware to your ESP32:
+```
+bash
+Copy code
+idf.py -p <PORT> flash
+```
+
+### Monitor the output:
+```
+bash
+Copy code
+idf.py monitor
+```
+
+### Usage
+
+Launch the ETS2 Controller Box on your device.
+Connect it to your ETS2 game using the configured network settings.
+Customize the dashboard according to your preferences.
+
+### Contributing
+We welcome contributions! To contribute, please fork the repository, create a new branch, and submit a pull request with your changes.
+
+Fork the project.
+Create your feature branch:
+bash
+Copy code
+git checkout -b feature/AmazingFeature
+Commit your changes:
+bash
+Copy code
+git commit -m 'Add some amazing feature'
+Push to the branch:
+bash
+Copy code
+git push origin feature/AmazingFeature
+Open a pull request.
+
+## Folder Contents
+
+Below is short explanation of remaining files in the project folder.
+```
+├── CMakeLists.txt
+├── doc
+│   ├── Documentation.md
+│   └── Pictures
+├── .gitignore
+├── LICENSE
+├── main
+│   ├── CMakeLists.txt
+│   ├── include
+│   │   ├── ets2ctrl.h
+│   │   ├── httpHandler.h
+│   │   ├── tasksHandler.h
+│   │   └── wifiHandler.h
+│   ├── Kconfig.projbuild
+│   ├── main.c
+│   └── src
+│       ├── ets2ctrl.c
+│       ├── httpHandler.c
+│       ├── tasksHandler.c
+│       └── wifiHandler.c
+├── README.md                                       This is the file
+├── sdkconfig
+├── sdkconfig.old
+└── .vscode
+    └── settings.json
+
+```
+## License
+
+- Attribution-NonCommercial-ShareAlike 4.0 International ([LICENSE |https://github.com/dscabello/ETS2-Controller-box/blob/main/LICENSE])
+
+Feel free to add more sections like "Known Issues," "Future Work," or "Screenshots" if necessary. This README aims to provide a comprehensive introduction to your project, making it easy for users to understand and get started.
 
 (See the README.md file in the upper level 'examples' directory for more information about examples.)
 
 This is the simplest buildable example. The example is used by command `idf.py create-project`
 that copies the project to user specified path and set it's name. For more information follow the [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project)
-
-
-
-## How to use example
-We encourage the users to use the example as a template for the new projects.
-A recommended way is to follow the instructions on a [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project).
-
-## Example folder contents
-
-The project **sample_project** contains one source file in C language [main.c](main/main.c). The file is located in folder [main](main).
-
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt`
-files that provide set of directives and instructions describing the project's source files and targets
-(executable, library, or both). 
-
-Below is short explanation of remaining files in the project folder.
-
-```
-├── CMakeLists.txt
-├── main
-│   ├── CMakeLists.txt
-│   └── main.c
-└── README.md                  This is the file you are currently reading
-```
-Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
-They are not used or needed when building with CMake and idf.py.
