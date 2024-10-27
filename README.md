@@ -107,5 +107,5 @@ Below is short explanation of remaining files in the project folder.
 ```
 ## License
 
-- Attribution-NonCommercial-ShareAlike 4.0 International [LICENSE](https://github.com/dscabello/ETS2-Controller-box/blob/main/LICENSE])
+- Attribution-NonCommercial-ShareAlike 4.0 International [LICENSE](https://github.com/dscabello/ETS2-Controller-box/blob/main/LICENSE)
 
