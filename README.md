@@ -98,7 +98,7 @@ Below is short explanation of remaining files in the project folder.
 │       ├── httpHandler.c
 │       ├── tasksHandler.c
 │       └── wifiHandler.c
-├── README.md                                       This is the file
+├── README.md
 ├── sdkconfig
 ├── sdkconfig.old
 └── .vscode
@@ -107,11 +107,5 @@ Below is short explanation of remaining files in the project folder.
 ```
 ## License
 
-- Attribution-NonCommercial-ShareAlike 4.0 International ([LICENSE |https://github.com/dscabello/ETS2-Controller-box/blob/main/LICENSE])
+- Attribution-NonCommercial-ShareAlike 4.0 International [LICENSE](https://github.com/dscabello/ETS2-Controller-box/blob/main/LICENSE])
 
-Feel free to add more sections like "Known Issues," "Future Work," or "Screenshots" if necessary. This README aims to provide a comprehensive introduction to your project, making it easy for users to understand and get started.
-
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
-
-This is the simplest buildable example. The example is used by command `idf.py create-project`
-that copies the project to user specified path and set it's name. For more information follow the [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project)
