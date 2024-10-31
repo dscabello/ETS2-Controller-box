@@ -11,6 +11,7 @@
 
 #include "ets2ctrl.h"
 #include "httpHandler.h"
+#include "spiHandler.h"
 
 extern void MainThread(void *arg);
 

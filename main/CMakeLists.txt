@@ -6,6 +6,7 @@ SRCS
     "src/tasksHandler.c"
     "src/wifiHandler.c"
     "src/httpHandler.c"
+    "src/spiHandler.c"
 INCLUDE_DIRS
     "include"
 )

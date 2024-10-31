@@ -15,6 +15,7 @@
 #include "lwip/sys.h"
 
 #include "ets2ctrl.h"
+#include "spiHandler.h"
 
 extern bool WifiConnected;
 
