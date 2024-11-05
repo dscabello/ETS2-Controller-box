@@ -11,7 +11,6 @@
 #include "ets2ctrl.h"
 #include "wifiHandler.h"
 
-
 enum Types_e {
     NOT_DEFINED     = 0,
     BOOL_TYPE       = 1,
@@ -52,10 +51,9 @@ extern uint32_t JobInfo_income;
 
 extern uint32_t NavegationInfo_estimatedDistance;
 
+extern SemaphoreHandle_t HTTPSemaphore;
 
-
-extern bool RequestData;
-
+extern bool HttpRequestData();
 extern void HttpMainTask(void *pvParameters);
 
 #endif // HTTPHANDLER_H

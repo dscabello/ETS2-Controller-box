@@ -36,11 +36,12 @@
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
-bool WifiConnected = false;
+bool WifiConnectedFlag = false;
 
 static EventGroupHandle_t s_wifi_event_group;
 static int s_retry_num = 0;
 
+SemaphoreHandle_t WifiSemaphore = NULL;
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data) {
@@ -54,14 +55,14 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
-        WifiConnected = false;
+        WifiConnectedFlag = false;
         ESP_LOGI(TAG,"connect to the AP fail");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
-        WifiConnected = true;
+        WifiConnectedFlag = true;
     }
 }
 
@@ -128,6 +129,15 @@ void wifi_init(void) {
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
+}
+
+bool WifiConnected() {
+    if (xSemaphoreTake(WifiSemaphore, (TickType_t) 10) == pdTRUE) {
+        bool aux_flag = WifiConnectedFlag;
+        xSemaphoreGive(WifiSemaphore);
+        return aux_flag;
+    }
+    return false;
 }
 
 void ConnectToWifi()

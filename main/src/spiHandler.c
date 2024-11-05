@@ -69,7 +69,6 @@ i2c_device_config_t dev_cfg = {
     .scl_speed_hz = I2C_MASTER_FREQ_HZ,
 };
 
-uint8_t valorlegal = 0xFF;
 bool led_status = false;
 
 /**
@@ -141,20 +140,18 @@ bool CheckError_TLC59116() {
         ret = false;
     }
     if (ret == false) {
-        /* Reset target and try new configuration */
+        /* Reset target and set the last value */
+        /* TODO: Fix a issue in the current detection of TLC59116 */
         gpio_set_level(GPIO_NUM_23, 0);
         led_status = !led_status;
         gpio_set_level(GPIO_NUM_2, led_status);
         ESP_LOGI(TAG,"Reset");
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(1));
         gpio_set_level(GPIO_NUM_23, 1);
-        vTaskDelay(pdMS_TO_TICKS(20));
-        //valorlegal--;
+        vTaskDelay(pdMS_TO_TICKS(1));
         RegisterWriteByte_TLC59116(TLC59116_MODE_1_REG, 0x00);
         RegisterWriteByte_TLC59116(TLC59116_MODE_2_REG, 0x88);
-        RegisterWriteByte_TLC59116(TLC59116_IREF_REG, valorlegal);
         EnablePWMOutput();
-        ESP_LOGI(TAG,"TLC59116_IREF_REG = %x", valorlegal);
     }
     return ret;
 }
@@ -193,102 +190,6 @@ void spiHandler() {
         gpio_set_level(GPIO_NUM_23, 1);
         RegisterWriteByte_TLC59116(TLC59116_MODE_1_REG, 0x00);
         RegisterWriteByte_TLC59116(TLC59116_MODE_2_REG, 0x88);
-        RegisterWriteByte_TLC59116(TLC59116_IREF_REG, valorlegal);
         EnablePWMOutput();
-        // RegisterWriteByte_TLC59116(TLC59116_PWR_00_ADDR_REG, 0x20);
-        // vTaskDelay(pdMS_TO_TICKS(5000));
-        // DisablePWMOutput();
-        // vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    return;
-
-    // /* Read the TLC59116 WHO_AM_I register, on power up the register should have the value 0x71 */
-
-    // uint8_t i;
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_00_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_01_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_02_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_03_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_04_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_05_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_06_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_07_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_08_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_09_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_10_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_11_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_12_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_13_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // for (i = 0 ; i < 25 ; i++) {
-    //     RegisterWriteByte_TLC59116(TLC59116_PWR_14_ADDR_REG, i*10);
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_00_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_01_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_02_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_03_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_04_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_05_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_06_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_07_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_08_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_09_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_10_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_11_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_12_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_13_ADDR_REG, 0);
-    // RegisterWriteByte_TLC59116(TLC59116_PWR_14_ADDR_REG, 0);
-    // vTaskDelay(pdMS_TO_TICKS(3000));
-    // uint8_t data[15];
-    // for (i = 0 ; i < 15 ; i++)
-    //     data[i] = 0x0A;
-
-    // RegisterWriteData_TLC59116(TLC59116_PWR_ADDR_INC_REG, data, sizeof(data));
-
-    // //ESP_LOGI(TAG, "WHO_AM_I 1 led 0 = %X", data[0]);
-
-    // vTaskDelay(pdMS_TO_TICKS(5000));
-
 }

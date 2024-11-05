@@ -17,7 +17,9 @@
 #include "ets2ctrl.h"
 #include "spiHandler.h"
 
-extern bool WifiConnected;
+extern SemaphoreHandle_t WifiSemaphore;
+
+extern bool WifiConnected();
 
 extern void ConnectToWifi();
 

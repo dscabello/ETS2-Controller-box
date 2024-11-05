@@ -1,10 +1,14 @@
 #include "ets2ctrl.h"
 
-#define TICK_FOR_LED_ANNIMATION_MS         80
+#define TICK_FOR_LED_ANNIMATION_MS         70
 #define TABLE_TIME_RESOLUTION_MS           100
 #define NUMBER_OF_LEDS                     16
 #define TIME_TABLE_POS                     16
 #define LED_VALUE_INC_CORRECTION           100 /* Used in the calculation for the fade */
+#define LED_OFF_POWER                      0x00
+#define LED_ON_POWER                       0x08
+#define LED_MAX_POWER                      0x30
+#define LED_BLINK_TIME                     600
 
 typedef enum {
     LED_CTRL_UNKNOWN,
@@ -21,6 +25,24 @@ typedef enum {
     LED_STS_STOP
 } LedSts_t;
 
+typedef struct {
+    LedSts_t LedSts;
+    const uint8_t (*matrix)[17];
+    uint8_t PosAtual;
+    uint8_t PosFinal;
+    int16_t Increment_PWM[NUMBER_OF_LEDS]; /* Used to create a fade between the frames * 100 */
+    uint8_t CurrentValue[NUMBER_OF_LEDS];
+    uint16_t TimeCounter;
+} LedAnnimation_t;
+
+typedef struct {
+    uint16_t LedBlink;
+    uint16_t LedPowerMAX;
+    int16_t Increment_PWM[NUMBER_OF_LEDS]; /* Used to create a fade between the frames * 100 */
+    uint8_t LedPower[NUMBER_OF_LEDS];
+    bool LedOn;
+} LedETS2Ctrl_t;
+
 const char *TAG = "Ets2 Controller Box";
 
 const uint8_t InitAnnimation[5][17] = {
@@ -32,17 +54,11 @@ const uint8_t InitAnnimation[5][17] = {
     { 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x0A },
 };
 
-typedef struct {
-    LedSts_t LedSts;
-    const uint8_t (*matrix)[17];
-    uint8_t PosAtual;
-    uint8_t PosFinal;
-    int16_t Increment_PWM[NUMBER_OF_LEDS]; /* Used to create a fade between the frames * 100 */
-    uint8_t CurrentValue[NUMBER_OF_LEDS];
-    uint16_t TimeCounter;
-} LedAnnimation_t;
-
 LedAnnimation_t LedAnnimation;
+
+LedETS2Ctrl_t LedETS2Ctrl;
+
+SemaphoreHandle_t LedSemaphore = NULL;
 
 void ledAnnimationCalcInc(const uint8_t (*matrix)[17], const uint8_t pos_A, const uint8_t pos_B) {
     uint8_t led_num;
@@ -149,27 +165,101 @@ void ledRunAnnimation() {
     }
 }
 
+void ledRunEts2() {
+    uint8_t i;
+    uint8_t min_led_power = LED_OFF_POWER;
+    uint16_t aux_inc = (int16_t)((LED_MAX_POWER - LED_OFF_POWER) * LED_VALUE_INC_CORRECTION) / (LED_BLINK_TIME / TICK_FOR_LED_ANNIMATION_MS);
+    static uint16_t aux_blink = 0x0000;
+    static uint16_t aux_led_power_max = 0x0000;
+    if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
+        if (LedETS2Ctrl.LedOn == true) {
+            min_led_power = LED_ON_POWER;
+            aux_inc = (int16_t)((LED_MAX_POWER - LED_ON_POWER) * LED_VALUE_INC_CORRECTION) / (LED_BLINK_TIME / TICK_FOR_LED_ANNIMATION_MS);
+        }
+        aux_blink = LedETS2Ctrl.LedBlink;
+        aux_led_power_max = LedETS2Ctrl.LedPowerMAX;
+        xSemaphoreGive(LedSemaphore);
+    }
+    for(i = 0 ; i < NUMBER_OF_LEDS; i++) {
+        if (aux_blink & (1 << i)) {
+            if (LedETS2Ctrl.LedPower[i] < min_led_power)
+                LedETS2Ctrl.LedPower[i] = min_led_power;
+
+            if (LedETS2Ctrl.LedPower[i] == LED_MAX_POWER) {
+                LedETS2Ctrl.Increment_PWM[i] = -aux_inc;
+            } else if (LedETS2Ctrl.LedPower[i] == min_led_power) {
+                LedETS2Ctrl.Increment_PWM[i] = aux_inc;
+            }
+            if (LedETS2Ctrl.Increment_PWM[i] < 0) {
+                uint16_t aux_calc = LedETS2Ctrl.LedPower[i]*LED_VALUE_INC_CORRECTION;
+                LedETS2Ctrl.LedPower[i] = (uint8_t)((aux_calc > LedETS2Ctrl.Increment_PWM[i]) ? (aux_calc + LedETS2Ctrl.Increment_PWM[i]) / LED_VALUE_INC_CORRECTION : min_led_power);
+            } else {
+                uint16_t aux_calc = LedETS2Ctrl.LedPower[i]*LED_VALUE_INC_CORRECTION;
+                LedETS2Ctrl.LedPower[i] = (uint8_t)((aux_calc < LedETS2Ctrl.Increment_PWM[i]) ? (aux_calc + LedETS2Ctrl.Increment_PWM[i]) / LED_VALUE_INC_CORRECTION : LED_MAX_POWER);
+            }
+
+        } else if (aux_led_power_max & (1 << i)) {
+            LedETS2Ctrl.LedPower[i] = LED_MAX_POWER;
+        } else {
+            LedETS2Ctrl.LedPower[i] = min_led_power;
+        }
+    }
+    while (WriteAllPWM(LedETS2Ctrl.LedPower, NUMBER_OF_LEDS) == false) {
+        // TODO: Adding a retry max counter
+    }
+}
+
+void ledCmdOn() {
+    if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
+        LedETS2Ctrl.LedOn = true;
+        xSemaphoreGive(LedSemaphore);
+    }
+}
+
+void ledCmdOFF(CmdLedNum_t LedNumber) {
+    if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
+        LedETS2Ctrl.LedOn = false;
+        xSemaphoreGive(LedSemaphore);
+    }
+}
+
+void ledCmdTurnOnBlink(CmdLedNum_t LedNumber) {
+    if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
+        LedETS2Ctrl.LedBlink |= LedNumber;
+        xSemaphoreGive(LedSemaphore);
+    }
+}
+
+void ledCmdTurnOFFBlink(CmdLedNum_t LedNumber) {
+    if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
+        LedETS2Ctrl.LedBlink &= (uint16_t)(!LedNumber);
+        xSemaphoreGive(LedSemaphore);
+    }
+}
+
+void ledCmdTurnOn(CmdLedNum_t LedNumber) {
+    if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
+        LedETS2Ctrl.LedPowerMAX |= LedNumber;
+        xSemaphoreGive(LedSemaphore);
+    }
+}
+
+void ledCmdTurnOFF(CmdLedNum_t LedNumber) {
+    if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
+        LedETS2Ctrl.LedPowerMAX &= (uint16_t)(!LedNumber);
+        xSemaphoreGive(LedSemaphore);
+    }
+}
+
 void ledHandler(void *arg)
 {
-    // uint8_t data[15];
-    // uint8_t i;
+    LedETS2Ctrl.LedOn = true;
+    LedETS2Ctrl.LedBlink = 0x0F01;
+    LedETS2Ctrl.LedPowerMAX = 0x0002;
     ledRunAnnimationCmd(LED_CTRL_START, InitAnnimation, 5);
     while (1) {
-        // for (i = 0 ; i < 15 ; i++)
-        //     data[i] = 0x00;
-        // WriteAllPWM(data, NUMBER_OF_LEDS);
-        // vTaskDelay(pdMS_TO_TICKS(30));
-        // for (i = 0 ; i < 15 ; i++)
-        //     data[i] = 0xC1;
-        // WriteAllPWM(data, NUMBER_OF_LEDS);
-        // vTaskDelay(pdMS_TO_TICKS(30));
-        // for (i = 0 ; i < 15 ; i++)
-        //     data[i] = 0x30;
-        // WriteAllPWM(data, NUMBER_OF_LEDS);
-        // vTaskDelay(pdMS_TO_TICKS(30));
-
-       ledRunAnnimation();
+       //ledRunAnnimation();
+       ledRunEts2();
        vTaskDelay(pdMS_TO_TICKS(TICK_FOR_LED_ANNIMATION_MS));
     }
-
 }
