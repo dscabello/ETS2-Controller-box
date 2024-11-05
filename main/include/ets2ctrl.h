@@ -6,6 +6,7 @@
 #include "httpHandler.h"
 #include "spiHandler.h"
 
+#define CMD_LED_ALL         (uint16_t)(0xFFFF)
 typedef enum {
     CMD_LED_01 = (1 << 0),
     CMD_LED_02 = (1 << 1),
@@ -29,8 +30,8 @@ extern const char *TAG;
 
 extern SemaphoreHandle_t LedSemaphore;
 
-void ledCmdOn();
-void ledCmdOFF(CmdLedNum_t LedNumber);
+void ledBackLightOn();
+void ledBackLightOFF();
 void ledCmdTurnOnBlink(CmdLedNum_t LedNumber);
 void ledCmdTurnOFFBlink(CmdLedNum_t LedNumber);
 void ledCmdTurnOn(CmdLedNum_t LedNumber);

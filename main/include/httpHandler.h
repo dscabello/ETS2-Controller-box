@@ -25,6 +25,34 @@ typedef struct {
     enum Types_e types;       // Tipo da variável ('i' para int, 'b' para bool)
 } VarMap_t;
 
+typedef struct {
+    bool connected;
+    bool paused;
+} Game_t;
+
+typedef struct {
+    int32_t gear;
+    bool wipersOn;
+    bool lightsParkingOn;
+    bool lightsBeamLowOn;
+    bool lightsBeamHighOn;
+    bool blinkerLeftOn;
+    bool blinkerRightOn;
+} TruckInfo_t;
+
+typedef struct {
+    bool attached;
+} Trailer_t;
+
+typedef struct {
+    bool value_update;
+    Game_t game;
+    TruckInfo_t truck;
+    Trailer_t trailer;
+} Telemetry_t;
+
+extern Telemetry_t Telemetry;
+
 extern bool GameInfo_connected;
 
 extern int32_t TruckInfo_gear; // TODO: Verify if we have negative values
@@ -54,6 +82,7 @@ extern uint32_t NavegationInfo_estimatedDistance;
 extern SemaphoreHandle_t HTTPSemaphore;
 
 extern bool HttpRequestData();
+extern Telemetry_t GetTelemetry();
 extern void HttpMainTask(void *pvParameters);
 
 #endif // HTTPHANDLER_H

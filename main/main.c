@@ -16,14 +16,13 @@
 void app_main(void)
 {
     ConnectToWifi();
-    /* Create  Semaphors*/
+    /* Create  Semaphore */
     LedSemaphore = xSemaphoreCreateBinary();
     if (LedSemaphore != NULL)
         xSemaphoreGive(LedSemaphore);
     HTTPSemaphore = xSemaphoreCreateBinary();
     if (HTTPSemaphore != NULL)
         xSemaphoreGive(HTTPSemaphore);
-
     WifiSemaphore = xSemaphoreCreateBinary();
     if (WifiSemaphore != NULL)
         xSemaphoreGive(WifiSemaphore);
@@ -35,5 +34,4 @@ void app_main(void)
     xTaskCreatePinnedToCore(MainThread, "Main_Thread", 4096, NULL, 2, NULL, tskNO_AFFINITY);
     xTaskCreate(&HttpMainTask, "Http_Main_Task", 8192, NULL, 5, NULL);
     ESP_LOGI(TAG, "End");
-
 }

@@ -150,7 +150,7 @@ bool CheckError_TLC59116() {
         gpio_set_level(GPIO_NUM_23, 1);
         vTaskDelay(pdMS_TO_TICKS(1));
         RegisterWriteByte_TLC59116(TLC59116_MODE_1_REG, 0x00);
-        RegisterWriteByte_TLC59116(TLC59116_MODE_2_REG, 0x88);
+        RegisterWriteByte_TLC59116(TLC59116_MODE_2_REG, 0x80);
         EnablePWMOutput();
     }
     return ret;
@@ -189,7 +189,7 @@ void spiHandler() {
         ESP_LOGI(TAG, "TLC59116 started");
         gpio_set_level(GPIO_NUM_23, 1);
         RegisterWriteByte_TLC59116(TLC59116_MODE_1_REG, 0x00);
-        RegisterWriteByte_TLC59116(TLC59116_MODE_2_REG, 0x88);
+        RegisterWriteByte_TLC59116(TLC59116_MODE_2_REG, 0x80);
         EnablePWMOutput();
     }
 }

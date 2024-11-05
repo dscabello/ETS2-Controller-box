@@ -209,14 +209,14 @@ void ledRunEts2() {
     }
 }
 
-void ledCmdOn() {
+void ledBackLightOn() {
     if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
         LedETS2Ctrl.LedOn = true;
         xSemaphoreGive(LedSemaphore);
     }
 }
 
-void ledCmdOFF(CmdLedNum_t LedNumber) {
+void ledBackLightOFF() {
     if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
         LedETS2Ctrl.LedOn = false;
         xSemaphoreGive(LedSemaphore);
@@ -232,7 +232,7 @@ void ledCmdTurnOnBlink(CmdLedNum_t LedNumber) {
 
 void ledCmdTurnOFFBlink(CmdLedNum_t LedNumber) {
     if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
-        LedETS2Ctrl.LedBlink &= (uint16_t)(!LedNumber);
+        LedETS2Ctrl.LedBlink &= ~(uint16_t)(LedNumber);
         xSemaphoreGive(LedSemaphore);
     }
 }
@@ -246,17 +246,18 @@ void ledCmdTurnOn(CmdLedNum_t LedNumber) {
 
 void ledCmdTurnOFF(CmdLedNum_t LedNumber) {
     if (xSemaphoreTake(LedSemaphore, (TickType_t) 10) == pdTRUE) {
-        LedETS2Ctrl.LedPowerMAX &= (uint16_t)(!LedNumber);
+        LedETS2Ctrl.LedPowerMAX &= ~((uint16_t)(LedNumber));
         xSemaphoreGive(LedSemaphore);
     }
 }
 
 void ledHandler(void *arg)
 {
-    LedETS2Ctrl.LedOn = true;
-    LedETS2Ctrl.LedBlink = 0x0F01;
-    LedETS2Ctrl.LedPowerMAX = 0x0002;
-    ledRunAnnimationCmd(LED_CTRL_START, InitAnnimation, 5);
+    LedETS2Ctrl.LedOn = false;
+    LedETS2Ctrl.LedBlink = 0x0000;
+    LedETS2Ctrl.LedPowerMAX = 0x0000;
+    // ledRunAnnimationCmd(LED_CTRL_START, InitAnnimation, 5);
+
     while (1) {
        //ledRunAnnimation();
        ledRunEts2();
