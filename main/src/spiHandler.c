@@ -106,10 +106,10 @@ static esp_err_t RegisterWriteByte_TLC59116(uint8_t reg_addr, uint8_t data) {
 static esp_err_t spiMasterInit(void)
 {
     ESP_LOGI(TAG, "Set Reset IO");
-    gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);  // Define como saída
+    gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
     gpio_set_pull_mode(GPIO_NUM_23, GPIO_PULLUP_ONLY);
 
-    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);  // Define como saída
+    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
     gpio_set_pull_mode(GPIO_NUM_2, GPIO_PULLUP_ONLY);
     gpio_set_level(GPIO_NUM_2, 0);
 

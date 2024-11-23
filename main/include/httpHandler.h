@@ -22,7 +22,7 @@ typedef struct {
     const char *group;
     const char *name;
     void *varPointer;
-    enum Types_e types;       // Tipo da variável ('i' para int, 'b' para bool)
+    enum Types_e types;
 } VarMap_t;
 
 typedef struct {

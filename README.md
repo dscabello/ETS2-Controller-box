@@ -13,10 +13,14 @@ The ETS2 Controller Box is a feedback software designed for Euro Truck Simulator
 
 Before you begin, ensure you have met the following requirements:
 
-- Hardware: A compatible device running ETS2.
+- Hardware: EG STARTS Board.
+- ESP32 development Board
 Software:
 - ESP-IDF (for ESP32 development)
 - Dependencies as mentioned in the requirements.txt (ESP-IDF).
+- Game ETS2
+- [Telemetry Web Server](https://github.com/Funbit/ets2-telemetry-server)
+- [Euro Truck Simulator 2](http://www.eurotrucksimulator2.com/)
 
 ## Installation
 
@@ -82,13 +86,13 @@ Below is short explanation of remaining files in the project folder.
 ├── doc
 │   ├── Documentation.md
 │   └── Pictures
-├── .gitignore
 ├── LICENSE
 ├── main
 │   ├── CMakeLists.txt
 │   ├── include
 │   │   ├── ets2ctrl.h
 │   │   ├── httpHandler.h
+│   │   ├── spiHandler.h
 │   │   ├── tasksHandler.h
 │   │   └── wifiHandler.h
 │   ├── Kconfig.projbuild
@@ -96,13 +100,11 @@ Below is short explanation of remaining files in the project folder.
 │   └── src
 │       ├── ets2ctrl.c
 │       ├── httpHandler.c
+│       ├── spiHandler.c
 │       ├── tasksHandler.c
 │       └── wifiHandler.c
-├── README.md
-├── sdkconfig
-├── sdkconfig.old
-└── .vscode
-    └── settings.json
+└── README.md
+
 
 ```
 ## License

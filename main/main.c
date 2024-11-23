@@ -16,7 +16,7 @@
 void app_main(void)
 {
     ConnectToWifi();
-    /* Create  Semaphore */
+    /* Create  Semaphores */
     LedSemaphore = xSemaphoreCreateBinary();
     if (LedSemaphore != NULL)
         xSemaphoreGive(LedSemaphore);

@@ -76,4 +76,25 @@ menu "User Configuration"
             help
                 Buffer size of json data from http server.
     endmenu
+    menu "LED ETS2 Settings"
+        config LEDS_MAX_POWER
+            int "Max power of leds"
+            default 48
+            range 0 255
+            help
+                Max power of leds in case of on or blinking.
+        config BACKLIGHT_LEDS_POWER
+            int "LEDs backlight power"
+            default 8
+            range 0 255
+            help
+                Backlight power.
+        config BLINK_LEDS_TIME
+            int "Blink leds time (ms)"
+            default 600
+            range 70 3000
+            help
+                Blink leds time when selected.
+    endmenu
+
 endmenu

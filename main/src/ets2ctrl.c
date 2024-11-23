@@ -6,9 +6,9 @@
 #define TIME_TABLE_POS                     16
 #define LED_VALUE_INC_CORRECTION           100 /* Used in the calculation for the fade */
 #define LED_OFF_POWER                      0x00
-#define LED_ON_POWER                       0x08
-#define LED_MAX_POWER                      0x30
-#define LED_BLINK_TIME                     600
+#define LED_ON_POWER                       CONFIG_BACKLIGHT_LEDS_POWER
+#define LED_MAX_POWER                      CONFIG_LEDS_MAX_POWER
+#define LED_BLINK_TIME                     CONFIG_BLINK_LEDS_TIME
 
 typedef enum {
     LED_CTRL_UNKNOWN,
@@ -73,7 +73,7 @@ void ledAnnimationCalcInc(const uint8_t (*matrix)[17], const uint8_t pos_A, cons
         } else {
             LedAnnimation.Increment_PWM[led_num] = 0;
         }
-        // ESP_LOGI(TAG,"ledRunAnnimationCalcInc: Pos %d -> Pos %d LED %d PosA %d posB %d inc %d time = %d.", pos_A, pos_B, led_num, matrix[pos_A][led_num], matrix[pos_B][led_num], LedAnnimation.Increment_PWM[led_num], matrix[pos_A][TIME_TABLE_POS]);
+        ESP_LOGD(TAG,"ledRunAnnimationCalcInc: Pos %d -> Pos %d LED %d PosA %d posB %d inc %d time = %d.", pos_A, pos_B, led_num, matrix[pos_A][led_num], matrix[pos_B][led_num], LedAnnimation.Increment_PWM[led_num], matrix[pos_A][TIME_TABLE_POS]);
     }
 }
 
@@ -134,7 +134,7 @@ void ledRunAnnimation() {
                         LedAnnimation.CurrentValue[i] = (uint8_t)( ((LedAnnimation.CurrentValue[i] * LED_VALUE_INC_CORRECTION) + LedAnnimation.Increment_PWM[i]) / LED_VALUE_INC_CORRECTION);
                     }
                     WriteAllPWM(LedAnnimation.CurrentValue, NUMBER_OF_LEDS);
-                    //ESP_LOGI(TAG,"Led 0 = %d, inc = %d.", LedAnnimation.CurrentValue[0], LedAnnimation.Increment_PWM[0]);
+                    ESP_LOGD(TAG,"Led 0 = %d, inc = %d.", LedAnnimation.CurrentValue[0], LedAnnimation.Increment_PWM[0]);
                 } else {
                     LedAnnimation.PosAtual++;
                     uint8_t next_pos;
@@ -153,7 +153,7 @@ void ledRunAnnimation() {
                     if (WriteAllPWM(LedAnnimation.CurrentValue, NUMBER_OF_LEDS) == false) {
                         //LedAnnimation.LedSts = LED_STS_STOP;
                     }
-                    // ESP_LOGI(TAG,"Next frame = %d, timer = %d.", LedAnnimation.PosAtual, LedAnnimation.TimeCounter);
+                    ESP_LOGV(TAG,"Next frame = %d, timer = %d.", LedAnnimation.PosAtual, LedAnnimation.TimeCounter);
                 }
             break;
         case LED_STS_STOPPING:

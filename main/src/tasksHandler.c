@@ -1,8 +1,6 @@
 #include "tasksHandler.h"
 
 
-
-
 void MainThread(void *arg) {
     Telemetry_t Telemetry_tmp;
     printf("Start MainTask thread.\n");
@@ -10,7 +8,7 @@ void MainThread(void *arg) {
         vTaskDelay(pdMS_TO_TICKS(100));
         HttpRequestData();
         Telemetry_tmp = GetTelemetry();
-        // if (Telemetry_tmp.game.connected) {
+        if (Telemetry_tmp.game.connected) {
             if (Telemetry_tmp.value_update) {
                 if (Telemetry_tmp.truck.lightsParkingOn)
                    ledBackLightOn();
@@ -47,12 +45,7 @@ void MainThread(void *arg) {
                 } else {
                     ledCmdTurnOFFBlink(CMD_LED_10 | CMD_LED_13);
                 }
-        //     } else
-        //         printf(">>>> paused <<<.\n");
-        // } else {
-        //     ledCmdTurnOFFBlink(CMD_LED_ALL);
-        //     ledCmdTurnOFF(CMD_LED_ALL);
+            }
         }
-
     }
 }
