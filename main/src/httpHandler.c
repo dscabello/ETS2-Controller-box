@@ -9,7 +9,7 @@ Telemetry_t Telemetry;
 /* var_map used to link json and vars */
 const VarMap_t var_map[] = {
     { "game"        , "connected"         , &Telemetry.game.connected           , BOOL_TYPE     },
-    { "game"        , "paused"            , &Telemetry.game.connected           , BOOL_TYPE     },
+    { "game"        , "paused"            , &Telemetry.game.paused              , BOOL_TYPE     },
     { "truck"       , "gear"              , &Telemetry.truck.gear               , INT32_TYPE    },
     { "truck"       , "wipersOn"          , &Telemetry.truck.wipersOn           , BOOL_TYPE     },
     { "truck"       , "lightsParkingOn"   , &Telemetry.truck.lightsParkingOn    , BOOL_TYPE     },
