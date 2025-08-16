@@ -11,11 +11,15 @@
 #include "ets2ctrl.h"
 #include "wifiHandler.h"
 
+#define MAX_SIZE_STRING_TYPE 21
+#define SIZE_GAME_TIME 21 // Format "0001-01-28T14:35:00Z"
+
 enum Types_e {
     NOT_DEFINED     = 0,
     BOOL_TYPE       = 1,
     INT32_TYPE      = 2,
-    UINT32_TYPE     = 3
+    UINT32_TYPE     = 3,
+    STRING_TYPE     = 4
 };
 
 typedef struct {
@@ -28,6 +32,7 @@ typedef struct {
 typedef struct {
     bool connected;
     bool paused;
+    char time[SIZE_GAME_TIME];
 } Game_t;
 
 typedef struct {

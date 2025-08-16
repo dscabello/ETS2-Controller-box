@@ -3,18 +3,21 @@
 
 #define HTTP_SERVER_URL         CONFIG_HTTP_SERVER_URL
 #define BUFFER_SIZE             CONFIG_BUFFER_SIZE
+#define COUNT_TO_RECOVERY_HTTP  6000
 
 Telemetry_t Telemetry;
+uint32_t RecoveryHttpCount;
 
 /* var_map used to link json and vars */
 const VarMap_t var_map[] = {
     { "game"        , "connected"         , &Telemetry.game.connected           , BOOL_TYPE     },
     { "game"        , "paused"            , &Telemetry.game.paused              , BOOL_TYPE     },
+    { "game"        , "time"              , &Telemetry.game.time                , STRING_TYPE   },
     { "truck"       , "gear"              , &Telemetry.truck.gear               , INT32_TYPE    },
     { "truck"       , "wipersOn"          , &Telemetry.truck.wipersOn           , BOOL_TYPE     },
     { "truck"       , "lightsParkingOn"   , &Telemetry.truck.lightsParkingOn    , BOOL_TYPE     },
     { "truck"       , "lightsBeamLowOn"   , &Telemetry.truck.lightsBeamLowOn    , BOOL_TYPE     },
-    { "truck"       , "lightsBeamHighOn"  , &Telemetry.truck.lightsBeamHighOn  , BOOL_TYPE     },
+    { "truck"       , "lightsBeamHighOn"  , &Telemetry.truck.lightsBeamHighOn   , BOOL_TYPE     },
     { "truck"       , "blinkerLeftOn"     , &Telemetry.truck.blinkerLeftOn      , BOOL_TYPE     },
     { "truck"       , "blinkerRightOn"    , &Telemetry.truck.blinkerRightOn     , BOOL_TYPE     },
     { "trailer"     , "attached"          , &Telemetry.trailer.attached         , BOOL_TYPE     }
@@ -64,6 +67,21 @@ void ETS2_setVar(cJSON* cJSON_item_ptr, const VarMap_t* var_map_ptr) {
             // ESP_LOGI(TAG,"Decode group = \"%s\", item = \"%s\", INT32_TYPE = %" PRId32, var_map_ptr->group, var_map_ptr->name, aux_number);
         } else {
             ESP_LOGE(TAG,"Error: Decoding group = \"%s\", item = \"%s\" as a UINT32_TYPE", var_map_ptr->group, var_map_ptr->name);
+        }
+    } else if (var_map_ptr->types == STRING_TYPE) {
+        if (cJSON_IsString(cJSON_item_ptr)) {
+            const char *str_ptr = cJSON_GetStringValue(cJSON_item_ptr);
+            if (strlen(str_ptr) < MAX_SIZE_STRING_TYPE) {
+                if (xSemaphoreTake(TelemetrySemaphore, (TickType_t) 10) == pdTRUE) {
+                    strncpy((var_map_ptr->varPointer), str_ptr, strlen(str_ptr));
+                    xSemaphoreGive(TelemetrySemaphore);
+                }
+            } else {
+                ESP_LOGE(TAG,"Error: Decoding group = \"%s\", item = \"%s\" as a STRING_TYPE wrong size %u.", var_map_ptr->group, var_map_ptr->name, strlen(str_ptr));
+            }
+            // ESP_LOGI(TAG,"Decode group = \"%s\", item = \"%s\", STRING_TYPE[%u] = %s", var_map_ptr->group, var_map_ptr->name, strlen(str_ptr), str_ptr);
+        } else {
+            ESP_LOGE(TAG,"Error: Decoding group = \"%s\", item = \"%s\" as a STRING_TYPE", var_map_ptr->group, var_map_ptr->name);
         }
     } else {
         ESP_LOGE(TAG,"Error: no valid type.");
@@ -156,16 +174,16 @@ void HttpConfigInit() {
     };
     client = esp_http_client_init(&config);
     if (client == NULL) {
-        ESP_LOGE(TAG, "Falha ao inicializar o cliente HTTP.");
+        ESP_LOGE(TAG, "Error init HTTP.");
     } else {
-        ESP_LOGI(TAG, "Cliente HTTP inicializado com conexão persistente.");
+        ESP_LOGI(TAG, "HTTP client initialized.");
     }
 }
 
 esp_err_t HttpRequest() {
     // ESP_LOGI("MEMORY", "HttpRequest: Free heap size: %ld", esp_get_free_heap_size());
     if (client == NULL) {
-        ESP_LOGE(TAG, "Cliente HTTP not initialized.");
+        ESP_LOGE(TAG, "HPTT client not initialized.");
         return ESP_FAIL;
     }
 
@@ -204,9 +222,28 @@ Telemetry_t GetTelemetry() {
     return Telemetry_tmp;
 }
 
+void HttpCheck() {
+    if (xSemaphoreTake(TelemetrySemaphore, (TickType_t) 1) == pdTRUE) {
+        bool TelemttrySts = Telemetry.value_update;
+        xSemaphoreGive(TelemetrySemaphore);
+        if (TelemttrySts)
+            RecoveryHttpCount = 0;
+        else
+            RecoveryHttpCount++;
+        if (RecoveryHttpCount > COUNT_TO_RECOVERY_HTTP) {
+            RecoveryHttpCount = 0;
+            ESP_LOGI(TAG, "HttpRecovery.");
+            esp_http_client_cleanup(client);
+            vTaskDelay(pdMS_TO_TICKS(5000));
+            HttpConfigInit();
+            vTaskDelay(pdMS_TO_TICKS(100));
+        }
+    }
+}
 
 void HttpMainTask(void *pvParameters) {
     ESP_LOGI(TAG, "HttpMainTask init");
+    RecoveryHttpCount = 0;
     TelemetrySemaphore = xSemaphoreCreateBinary();
     if (TelemetrySemaphore != NULL)
         xSemaphoreGive(TelemetrySemaphore);
@@ -221,6 +258,7 @@ void HttpMainTask(void *pvParameters) {
                 xSemaphoreGive(HTTPSemaphore);
             }
             vTaskDelay(pdMS_TO_TICKS(5));
+            HttpCheck();
         } else {
             vTaskDelay(pdMS_TO_TICKS(1000));
         }

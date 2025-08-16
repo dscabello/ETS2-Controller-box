@@ -4,7 +4,7 @@ void PrintLogOnUpdate(Telemetry_t Telemetry_new)
 {
     static Telemetry_t Telemetry_old;
     if ((Telemetry_new.game.connected != Telemetry_old.game.connected)
-        || (Telemetry_new.value_update != Telemetry_old.value_update)
+        // || (Telemetry_new.value_update != Telemetry_old.value_update)
         || (Telemetry_new.truck.lightsParkingOn != Telemetry_old.truck.lightsParkingOn)
         || (Telemetry_new.truck.lightsBeamLowOn != Telemetry_old.truck.lightsBeamLowOn)
         || (Telemetry_new.truck.lightsBeamHighOn != Telemetry_old.truck.lightsBeamHighOn)
@@ -17,7 +17,8 @@ void PrintLogOnUpdate(Telemetry_t Telemetry_new)
         Telemetry_old = Telemetry_new;
         ESP_LOGI(TAG,"Telemetry connected:          %d.", Telemetry_old.game.connected);
         ESP_LOGI(TAG,"Telemetry paused:             %d.", Telemetry_old.game.paused);
-        ESP_LOGI(TAG,"Telemetry gear:               %." PRId32, Telemetry_old.truck.gear);
+        ESP_LOGI(TAG,"Telemetry time:               %s.", Telemetry_old.game.time);
+        ESP_LOGI(TAG,"Telemetry gear:               %d.", (int)(Telemetry_old.truck.gear));
         ESP_LOGI(TAG,"Telemetry wipersOn:           %d.", Telemetry_old.truck.wipersOn);
         ESP_LOGI(TAG,"Telemetry lightsParkingOn:    %d.", Telemetry_old.truck.lightsParkingOn);
         ESP_LOGI(TAG,"Telemetry lightsBeamLowOn:    %d.", Telemetry_old.truck.lightsBeamLowOn);
@@ -25,6 +26,7 @@ void PrintLogOnUpdate(Telemetry_t Telemetry_new)
         ESP_LOGI(TAG,"Telemetry blinkerLeftOn:      %d.", Telemetry_old.truck.blinkerLeftOn);
         ESP_LOGI(TAG,"Telemetry blinkerRightOn:     %d.", Telemetry_old.truck.blinkerRightOn);
         ESP_LOGI(TAG,"Telemetry attached:           %d.", Telemetry_old.trailer.attached);
+        ESP_LOGI(TAG,"---------------------------------");
     }
 }
 
@@ -41,13 +43,14 @@ void MainThread(void *arg) {
                    ledBackLightOn();
                 else
                     ledBackLightOFF();
-                if (Telemetry_tmp.truck.lightsBeamLowOn) {
+                if (Telemetry_tmp.truck.lightsBeamLowOn)
                     ledCmdTurnOn(CMD_LED_02);
-                    if (Telemetry_tmp.truck.lightsBeamHighOn)
-                        ledCmdTurnOn(CMD_LED_03);
-                } else {
-                    ledCmdTurnOFF(CMD_LED_02 | CMD_LED_03);
-                }
+                else
+                    ledCmdTurnOFF(CMD_LED_02);
+                if (Telemetry_tmp.truck.lightsBeamHighOn)
+                    ledCmdTurnOn(CMD_LED_03);
+                else
+                    ledCmdTurnOFF(CMD_LED_03);
                 if (Telemetry_tmp.truck.wipersOn)
                     ledCmdTurnOnBlink(CMD_LED_04 | CMD_LED_07);
                 else
